@@ -82,6 +82,8 @@ Termination == <>(pc = "Done")
 
 ---------------------------------------------
 
-Test == b > 0
+TestPreLoop == i>2 \/ b = 1 \* On a pas commencé la boucle donc b=1
+TestPostLoop == i\leq2 \/ b = 2*c+2*a \* On a commencé la boucle donc b= 2*c + 2*a
+TestEnd == pc#"Done" \/ ( (r=1 /\ i=2) \/ (r=2*c+2*a /\ i>2) )
 
 ======================

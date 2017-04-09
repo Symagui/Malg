@@ -22,7 +22,9 @@
 <stringAttribute key="modelComments" value=""/>
 <booleanAttribute key="modelCorrectnessCheckDeadlock" value="true"/>
 <listAttribute key="modelCorrectnessInvariants">
-<listEntry value="1Test"/>
+<listEntry value="1TestPreLoop"/>
+<listEntry value="1TestPostLoop"/>
+<listEntry value="1TestEnd"/>
 </listAttribute>
 <listAttribute key="modelCorrectnessProperties">
 <listEntry value="0Termination"/>
