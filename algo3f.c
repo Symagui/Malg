@@ -9,13 +9,14 @@ axiomatic Solve {
 
   axiom solve_1: solve(1) ==  1;
 
-  axiom solve_n: \forall integer n;  n>1 ==> solve(n) == 2*solve(n-2)+2*solve(n-1);
+  axiom solve_n: \forall integer n;  (n>1 ==> solve(n) == 2*solve(n-2)+2*solve(n-1)) && (n<0 ==> solve(n) == 1);
 }*/
 
 
 /*@ 
 requires 0 <= x <= 24;
 ensures \result > 0;
+assigns \nothing;
 ensures \result == solve(x);
 */
 int p1(int x){
@@ -28,18 +29,23 @@ int p1(int x){
   } else if (x==1) {
     r=1;
   } else {
-		//@ assert x <= 24;
-		//@ loop invariant a>0 && b>0 && b == solve(i-1);
+		/*@ loop invariant positive : a>0 && b>0;
+				loop invariant solvb : b == solve(i-1);
+				loop invariant solva : a == solve(i-2);
+				loop invariant solvc : i>=3 ==> c == solve(i-3);
+				loop invariant i : 2 <= i <= x+1;
+				loop assigns a,b,c,i;*/
     while (i-1 < x){
-			//@ assert i <= x;
       i=i+1;
 	    c=a;
 	    a=b;
 	    b=2*c+2*b;
-			printf("%d\n", b);
+			
+			//printf("i = %d, b = %d\n",i, b);
 	  }
   	r=b;
   }
+	//@assert solve(x) == r;
   return(r);
 }
 
@@ -54,6 +60,8 @@ int main(){
   	scanf("%d", &v);
 	}
 	//@ assert v >= 0 && v< 25;
+	int p1v = p1(v);
+	//@ assert p1v == solve(v);
   printf(" voici la réponse de votre solution p2(%d)=%d\n",v,p1(v));
   return 0;
 }
