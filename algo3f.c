@@ -15,8 +15,9 @@ axiomatic Solve {
 
 /*@ 
 requires 0 <= x <= 24;
-ensures \result > 0;
+requires \forall int k; 0 <= k <= 1 ==> solve(k) == 1 && 2 <= k < 25 ==> solve(k) == 2*solve(k-1) + 2*solve(k-2);
 assigns \nothing;
+ensures \result > 0;
 ensures \result == solve(x);
 */
 int p1(int x){
