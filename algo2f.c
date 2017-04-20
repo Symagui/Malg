@@ -16,15 +16,13 @@ int main(){
   }
 
 
-  /*@ loop invariant \forall int i,j; (0 < i < c && c < j < n-1) ==> array[i] <= array[j] ;
-      loop invariant \forall int i,j; (0 < i < j && j < c) ==> array[i] <= array[j];
+  /*@ loop invariant \forall int i,j; (0 <= i < j < n && i < c) ==> array[i] <= array[j];
       loop invariant 0 <= c < n;
   */
   for (c = 0; c < (n-1); c++){
     position = c;
     /*@ loop invariant \forall int i; c <= i < d ==> array[position] <= array[i];
-        loop invariant \forall int i,j; (0 < i < c && c < j < n-1) ==> array[i] <= array[j] ;
-        loop invariant \forall int i,j; (0 < i < j && j < c) ==> array[i] <= array[j];
+        loop invariant \forall int i,j; (0 <= i < j < n && i < c) ==> array[i] <= array[j];
         loop invariant c+1 <= d <= n;
         loop invariant c<=position<n;
         loop assigns d,position; */
@@ -32,25 +30,25 @@ int main(){
       if (array[position]>array[d]) position = d;
     }
     //@ assert \forall int i; c<=i<n ==>array[position] <= array[i];
+    //@ assert \forall int i,j; (0 <= i < j < n && i < c) ==> array[i] <= array[j];
     if (position != c){
       swap = array[c];
       array[c] = array[position];
-      //@ assert \forall int i,j; (0 < i < c && c < j < n-1) ==> array[i] <= array[j] ;
-      //@ assert \forall int i,j; (0 < i < j && j < c) ==> array[i] <= array[j];
+      //@ assert \forall int i,j; (0 <= i < j < n && i < c) ==> array[i] <= array[j];
       array[position] = swap;
-      //@ assert c<=position<n;
-      //@ assert 0 <= c < n;
       //@ assert array[c] <= array[position];
+      //@ assert 0 <= c < n;
       //@ assert \forall int i; c<=i<n ==>array[c] <= array[i];
-      //@ assert \forall int i,j; (0 < i < c && c < j < n-1) ==> array[i] <= array[j] ;
-      //@ assert \forall int i,j; (0 < i < j && j < c) ==> array[i] <= array[j];
+      //@ assert \forall int i,j; (0 <= i < j < n && i < c) ==> array[i] <= array[j];
       
     }
-    // assert \forall int i,j; (0 < i < j && j < c) ==> array[i] <= array[j];
   }
-  //@ assert \forall int i,j; (0 < i < j && j < n-1) ==> array[i] <= array[j] ;
+  //@ assert \forall int i,j; (0 <= i < j <= n-1) ==> array[i] <= array[j] ;
   printf("Sorted list in ascending order :\n");
+  /*@ loop invariant \forall int i,j; (0 <= i < j <= n-1) ==> array[i] <= array[j] ;
+      loop invariant 0<= c <= n;*/
   for (c=0; c<n; c++){
+    //@ assert c<n-1 ==> array[c] <= array[c+1];
     printf("%d\n",array[c]);
   }
 
