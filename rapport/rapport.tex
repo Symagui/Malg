@@ -1,0 +1,399 @@
+\documentclass{scrreprt}
+\usepackage{graphicx}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{underscore}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[margin=2cm]{geometry}
+\textheight = 690pt
+\headheight = 27pt
+
+\usepackage{listingsutf8}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{
+  inputencoding=utf8/latin1,
+  frame=tb,
+  language=Mathematica,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\hypersetup{
+    bookmarks=false,    % show bookmarks bar?
+    pdftitle={PROJET MALG, Groupe 8},    % title
+    pdfauthor={CRAPANZANO Claire, FERRÉ Nicolas, MOLLARD Romaric, RUCHOT Guillaume},                     % author
+    pdfsubject={Groupe 8},                        % subject of the document
+    pdfkeywords={Preuve d'algorithme, TLAPS, TLA+, framac, Télécom Nancy, MALG}, % list of keywords
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=black,       % color of internal links
+    citecolor=black,       % color of links to bibliography
+    filecolor=black,        % color of file links
+    urlcolor=blue,        % color of external links
+    linktoc=page            % only page is linked
+}%
+
+
+\renewcommand*{\chapterheadstartvskip}{\vspace*{0cm}}
+\renewcommand*{\chapterheadendvskip}{\vspace{1cm}}
+\def\myversion{1.0 }
+\date{}
+\usepackage{hyperref}
+
+\addto\captionsenglish{%
+  \renewcommand\contentsname{Sommaire}%
+}
+
+\def\nbpage{33}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead[L]{Projet MALG, groupe 8}
+\fancyhead[R]{\leftmark}
+\fancyfoot[L]{Télécom Nancy, Mai 2017}
+\fancyfoot[C]{}
+\fancyfoot[R]{\thepage\ sur \nbpage}
+\fancypagestyle{plain}{%
+  \fancyhead[L]{Projet MALG, groupe 8}
+  \fancyhead[R]{\leftmark}
+  \fancyfoot[L]{Télécom Nancy, Mai 2017}
+  \fancyfoot[C]{}
+  \fancyfoot[R]{\thepage\ sur \nbpage}
+}
+\renewcommand{\headrulewidth}{0pt}
+
+\begin{document}
+
+\thispagestyle{empty}
+\begin{bfseries}
+    \begin{figure}
+      \includegraphics[height=1.4cm]{images/tn.png}
+      \hspace{1.2cm}
+      \includegraphics[height=1.4cm]{images/ul.png}
+      \vspace{3cm}
+    \end{figure}
+    \begin{flushright}
+      \rule{\paperwidth}{1pt}
+      \\
+      \vspace{2cm}
+      \Huge{PROJET MALG}\\
+      \vspace{0.5cm}
+      \huge
+      Groupe 8\\
+      \vspace{1.9cm}
+      \Large
+      \vspace*{\fill}
+      Préparé par\\
+      \vspace{0.5cm}
+      CRAPANZANO Claire\\
+      FERRÉ Nicolas\\
+      MOLLARD Romaric\\
+      RUCHOT Guillaume\\
+      %\vspace{1.9cm}
+      %MALG, Télécom Nancy\\
+      \vspace{1.9cm}
+      \small
+      Mai 2017\\
+    \end{flushright}
+\end{bfseries}
+
+\clearpage
+\setcounter{page}{1}
+
+\tableofcontents
+\begin{center}
+
+\end{center}
+
+
+\chapter{Introduction}
+
+%
+%
+%
+
+\chapter{Programme premier}
+
+\section{Description de l'algorithme}
+Ce programme demande à l'utilisateur un nombre n quelconque (entier), et le programme affiche alors les n premiers nombres premiers en partant de zero. Si n est négatif ou nul, le programme ne doit rien afficher.
+
+\section{Traduction PlusCal}
+\begin{lstlisting}
+//TODO Copy code
+\end{lstlisting}
+
+\section{Preuve TLA+}
+...
+
+\section{Preuve FramaC}
+Nous avons prouvé deux éléments grace à l'outil FramaC :\\
+1. Le programme ne retourne que des nombres premiers\\
+2. Le programme retourne le nombre de résultats demandé\\
+Pour celà nous avons rajouté quelques données dans l'algorithme afin par exemple de comptabiliser le nombre de printf, qui est matérialisé par la variable 'nbprintf' initialisée à 0.
+\\
+\begin{lstlisting}
+int main(){
+  int n, i = 3, count, c;
+
+  /*@ assert i==3; */
+
+  printf("Enter the number of prime numbers required\n");
+  scanf("%d",&n);
+	
+  //On protège n des valeurs négatives pour framac
+  if(n<0){
+	  n=0;
+  }
+	
+  //On ajoute une variable pour compter le nombre d'affichages total
+  int nbprintf = 0;
+	
+  /*@ assert n>=0; */
+  /*@ assert nbprintf==0; */
+
+  if (n>=1){
+    printf("First %d prime numbers are :\n", n);
+    printf("2\n"); //Preuve 1. Les résultats sont tous des nombes premiers
+	//On incrémente nbprintf
+	nbprintf++;
+  }
+  
+  //On s'assure qu'on a affiché 2 pour commencer
+  /*@ assert n>=1 ==> nbprintf==1; */ //Preuve 2. On a n==nombre de printf
+  /*@ assert n<1 ==> nbprintf==0; */ //Preuve 2. On a n==nombre de printf
+
+  
+  //Il faut prouver que la boucle termine
+  
+  /*@ loop invariant 2 <= count;
+      loop invariant i>count;
+      loop invariant nbprintf<=n;
+      loop invariant n>=1 ==> count<=n+1;
+      loop invariant n>=1 ==> nbprintf==count-1;
+      loop invariant n<1 ==> nbprintf==0;
+  */
+  for (count = 2; count <= n; ){
+    
+    /*@ assert count<=n;*/
+
+    /*@ loop invariant 2 <= c <= i;
+        loop invariant 2 <= count;
+        loop invariant i>count;
+        loop invariant nbprintf==count-1;
+        loop invariant count<=n;
+        loop invariant nbprintf<=n;
+        loop invariant c>=3 ==> i%(c-1)!=0;
+        loop invariant \forall int w; 2<=w<c ==> i%w!=0;
+    */
+    for (c = 2; c<= i-1;c++){
+      if (i%c == 0) {
+        /*@ assert i%c==0; */
+        break;
+      }
+      /*@ assert i%c!=0;*/
+    }
+    /*@ assert i%c==0 || i==c; */
+    /*@ assert \forall int w; 2<=w<c ==> i%w!=0;*/
+    /*@ assert count<=n;*/
+    /*@ assert nbprintf==count-1;*/
+
+    if (c == i){
+      /*@ assert i==c; */
+      
+      //On prouve que i est premier
+      /*@ assert \forall int w; 2<=w<i ==> i%w!=0;*/ //Preuve 1. Les résultats sont tous des nombes premiers
+      printf("%d\n",i);
+      
+	  //On incrémente nbprintf
+	  nbprintf++;
+      /*@ assert nbprintf==count;*/
+      
+      count++;
+      /*@ assert count<=n+1;*/
+      /*@ assert nbprintf==count-1;*/
+      /*@ assert nbprintf<=n;*/
+    }
+    
+    i++;
+    /*@assert count<=n+1;*/
+  }
+  /*@ assert count>=n+1; */
+  /*@ assert n>=1 ==> count==n+1; */
+
+  //On prouve qu'il y a le bon nombre de résultats
+  /*@ assert n>=1 ==> nbprintf==n; */
+  /*@ assert n<1 ==> nbprintf==0; */
+  /*@ assert n>=0; */
+
+  
+  /*@ assert nbprintf==n; */ //Preuve 2. On a n==nombre de printf
+  
+  return 0;
+}
+\end{lstlisting}
+
+\\
+Nous avons donc bien validé /*@ assert nbprintf==n; */ et /*@ assert \forall int w; 2<=w<i ==> i%w!=0;*/ avant chaque sortie de valeur.
+
+%
+%
+%
+
+\chapter{Tri 1 : Sélection}
+
+\section{Description de l'algorithme}
+Ce programme propose à l'utilisateur de créer une liste de n éléments, puis lui demande de rentrer les valeurs de cette liste une par une. Le programme affiche ensuite la liste triée par la méthode du tri sélection.
+
+\section{Traduction PlusCal}
+
+\section{Preuve TLA+}
+
+\section{Preuve FramaC}
+
+%
+%
+%
+
+\chapter{Autre algorithme}
+
+\section{Description de l'algorithme}
+Ce programme mistère calcule les éléments de la formule de récurrence \\
+\[ r(i) = 2*r(i-1) + 2*r(i-2), r(0) = 1, r(1) = 1 \]
+\\
+Après résolution, ceci correspond à la formule suivante : \\
+\[ r(i) = 1/2 * ((1-\sqrt(3))^i + (1+\sqrt(3))^i) \]
+\\
+
+\section{Traduction PlusCal}
+\begin{lstlisting}
+EXTENDS TLC,Integers, Reals
+
+(*
+--algorithm  Algo3 {
+variables a,b,c,i,r;
+{
+     a:=1;
+     b:=1;
+     i:=2;
+     if(x==0){
+        r:=1;
+     }else{
+        if(x==1){
+            r:=1;
+        }else{
+            while(i-1 < x)
+            {
+                i:=i+1;
+                c:=a;
+                a:=b;
+                b:=2*c+2*b;
+            };
+            r:=b;
+        }
+    }
+}
+
+}
+
+*)
+
+\* BEGIN TRANSLATION
+CONSTANT x
+VARIABLES a, b, c, i, r, pc
+
+vars == << a, b, c, i, r, pc >>
+
+Init == (* Global variables *)
+        /\ a = 1
+        /\ b = 1
+        /\ c = 0
+        /\ r = 0
+        /\ i = 2
+        /\ pc = "Lbl_1"
+
+Lbl_1 == /\ pc = "Lbl_1"
+         /\ a' = 1
+         /\ b' = 1
+         /\ i' = 2
+         /\ IF x=0
+               THEN /\ r' = 1
+                    /\ pc' = "Done"
+               ELSE /\ IF x=1
+                          THEN /\ r' = 1
+                               /\ pc' = "Done"
+                          ELSE /\ pc' = "Lbl_2"
+                               /\ r' = r
+         /\ c' = c
+
+Lbl_2 == /\ pc = "Lbl_2"
+         /\ IF i-1 < x
+               THEN /\ i' = i+1
+                    /\ c' = a
+                    /\ a' = b
+                    /\ b' = 2*c'+2*b
+                    /\ pc' = "Lbl_2"
+                    /\ r' = r
+               ELSE /\ r' = b
+                    /\ pc' = "Done"
+                    /\ UNCHANGED << a, b, c, i >>
+
+Next == Lbl_1 \/ Lbl_2
+           \/ (* Disjunct to prevent deadlock on termination *)
+              (pc = "Done" /\ UNCHANGED vars)
+
+Spec == Init /\ [][Next]_vars
+
+Termination == <>(pc = "Done")
+
+\* END TRANSLATION
+\end{lstlisting}
+
+\section{Preuve TLA+}
+La preuve TLA+ consiste en une preuve partielle du programme.\\
+La traduction automatique produit trois états :\\
+Init : qui représente le programme avant le premier if\\
+Lbl_1 : qui représente les tests et conditions if / else\\
+Lbl_2 : qui représente le while et donc le calcul de la formule décrite ci-dessus.\\
+La variable pc nous permet de connaitre l'état actuel du programme.\\
+\\
+\begin{lstlisting}
+TestPreLoop == i>2 \/ b = 1 \* On a pas commencé la boucle donc b=1
+TestPostLoop == i\leq2 \/ b = 2*c+2*a \* On a commencé la boucle donc b= 2*c + 2*a
+TestEnd == pc#"Done" \/ ( (x\leq1 /\ r=1) \/ (x>1 /\ r=2*c+2*a) ) \*Terminé donc soit c'est pas passé dans la boucle et c'est 1 soit c'est la formule récursive
+\end{lstlisting}
+\\
+Ceci nous permet de vérifier la formule de récurrence (en admettant c==b[i-1] et a==b[i-2]) et que les résultats pour i=0 et i=1 sont bien 1, soit les valeurs de base de la formule récurrente.
+
+\section{Preuve FramaC}
+
+%
+%
+%
+
+\chapter{Conclusion}
+
+
+\section{Difficultés rencontrées}
+
+\section{Temps et méthodes de travail}
+
+
+
+\end{document}
