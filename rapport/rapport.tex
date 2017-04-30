@@ -136,11 +136,162 @@ Ce programme demande à l'utilisateur un nombre n quelconque (entier), et le pro
 
 \section{Traduction PlusCal}
 \begin{lstlisting}
-//TODO Copy code
+EXTENDS Integers, TLC
+CONSTANTS n
+
+(*
+--algorithm algo1 {
+
+    variables i=3,count,c=2,nbprintf=0,lastprintedvalue=2,previouslastprintedvalue=1;
+    {
+        if (n >= 1) {
+            print <<"First ", n, " prime numbers are :">>;
+            print <<2>>;
+            nbprintf := nbprintf + 1;
+        };
+        
+        count := 2;
+        while (count <= n) {
+            c := 2;
+            while (c <= (i - 1) /\ (i % c) # 0) {
+                c := c + 1;
+            };
+            
+            if (c = i) {
+                print <<i>>;
+                nbprintf := nbprintf + 1;
+                previouslastprintedvalue := lastprintedvalue;
+                lastprintedvalue := i;
+                count := count + 1;
+            };
+            
+            i := i + 1;
+        }
+    }
+}
+
+*)
+\* BEGIN TRANSLATION
+CONSTANT defaultInitValue
+VARIABLES i, count, c, nbprintf, lastprintedvalue, previouslastprintedvalue, 
+          pc
+
+vars == << i, count, c, nbprintf, lastprintedvalue, previouslastprintedvalue, 
+           pc >>
+
+Init == (* Global variables *)
+        /\ i = 3
+        /\ count = defaultInitValue
+        /\ c = 2
+        /\ nbprintf = 0
+        /\ lastprintedvalue = 2
+        /\ previouslastprintedvalue = 1
+        /\ pc = "Lbl_1"
+
+Lbl_1 == /\ pc = "Lbl_1"
+         /\ IF n >= 1
+               THEN /\ PrintT(<<"First ", n, " prime numbers are :">>)
+                    /\ PrintT(<<2>>)
+                    /\ nbprintf' = nbprintf + 1
+               ELSE /\ TRUE
+                    /\ UNCHANGED nbprintf
+         /\ count' = 2
+         /\ pc' = "Lbl_2"
+         /\ UNCHANGED << i, c, lastprintedvalue, previouslastprintedvalue >>
+
+Lbl_2 == /\ pc = "Lbl_2"
+         /\ IF count <= n
+               THEN /\ c' = 2
+                    /\ pc' = "Lbl_3"
+               ELSE /\ pc' = "Done"
+                    /\ c' = c
+         /\ UNCHANGED << i, count, nbprintf, lastprintedvalue, 
+                         previouslastprintedvalue >>
+
+Lbl_3 == /\ pc = "Lbl_3"
+         /\ IF c <= (i - 1) /\ (i % c) # 0
+               THEN /\ c' = c + 1
+                    /\ pc' = "Lbl_3"
+                    /\ UNCHANGED << i, count, nbprintf, lastprintedvalue, 
+                                    previouslastprintedvalue >>
+               ELSE /\ IF c = i
+                          THEN /\ PrintT(<<i>>)
+                               /\ nbprintf' = nbprintf + 1
+                               /\ previouslastprintedvalue' = lastprintedvalue
+                               /\ lastprintedvalue' = i
+                               /\ count' = count + 1
+                          ELSE /\ TRUE
+                               /\ UNCHANGED << count, nbprintf, 
+                                               lastprintedvalue, 
+                                               previouslastprintedvalue >>
+                    /\ i' = i + 1
+                    /\ pc' = "Lbl_2"
+                    /\ c' = c
+
+Next == Lbl_1 \/ Lbl_2 \/ Lbl_3
+           \/ (* Disjunct to prevent deadlock on termination *)
+              (pc = "Done" /\ UNCHANGED vars)
+
+Spec == Init /\ [][Next]_vars
+
+Termination == <>(pc = "Done")
+
+\* END TRANSLATION
 \end{lstlisting}
 
+Lors de la traduction en PlusCal, nous avons fait le choix d'introduire deux nouvelles variables : \emph{nbprintf}, \emph{previouslastprintedvalue} et \emph{lastprintedvalue}. 
+\\
+Ces variables, qui correspondent respectivement au nombre de valeurs affichés, à l'avant dernière valeur affichée, et à la dernière valeur affichée, permettront de mettre en place correctement la preuve de ce programme.
+
 \section{Preuve TLA+}
-...
+\begin{lstlisting}
+max(a, b) == IF a > b THEN a ELSE b
+prime(a) == \A x \in 2..a : (x = a \/ a % x # 0)
+
+Pre ==
+    /\ pc = "Lbl_1" => n \in Int  (* l'entree n est conforme *)
+
+Post == 
+    /\ pc = "Done" /\ n \geq 0 => nbprintf = n  (* le nombre de valeur affichees au total est correct *)
+    /\ pc = "Done" /\ n < 0 => nbprintf = 0  (* le nombre de valeur affichees au total est correct *)
+
+Safe ==
+    /\ prime(lastprintedvalue) (* les nombres affiches sont premiers *)
+    /\ n \geq 0 => (nbprintf \leq n /\ nbprintf \geq 0) (* test du nombre de printf *)
+    /\ n < 0 => nbprintf = 0
+    /\ lastprintedvalue > previouslastprintedvalue (* les valeurs affichees sont dans l'ordre croissant *)
+    /\ lastprintedvalue - previouslastprintedvalue > 1 => (\A x \in previouslastprintedvalue + 1 .. lastprintedvalue - 1 : prime(x) = FALSE) (* aucune valeur entre deux affichées n'est premier *) 
+   
+Exec == 
+    /\ n \geq 1 => (count \leq n + 1 /\ count \geq 0) (* limites de count entre 0 et n + 1 *)
+    /\ n \leq 0 => (count \geq 0 /\ count \leq 2)
+    /\ c \leq i /\ c \geq 1 (* limites de c entre 1 et i *)
+    /\ i \geq 3 /\ i \in Nat (* i ne dépasse pas la limite des entiers *)
+\end{lstlisting}
+
+Nous avons défini plusieurs règles à la suite de la traduction du PlusCal.
+La première est \emph{Pre}, qui indique si la précondition du programme est bien respectée. Ici la precondition est simplement sur l'entrée \emph{n}, cette constante doit être entière.
+\\
+La deuxième est \emph{Post}, et indique la postcondition à obtenir à la fin du programme.
+Elle vérifie simplement que le nombre de valeurs affichées soit égal à \emph{n}.
+\\
+La troisième règle est \emph{Safe}, et désigne ce qui doit être respecté tout au long du programme.
+D'abord, les nombres affichées \emph{lastprintedvalue} doivent être premiers. De plus, le nombre de valeur affichées doit être toujours compris entre 0 et \emph{n} (et toujours nul si \emph{n} est négatif), il s'agit des deuxième et troisième lignes de \emph{Safe}.
+La quatrième indique que les nombres premiers affichés doivent être affichés dans l'ordre croissant, et la dernière ligne que entre deux valeurs affichées, il n'y a aucun nombre premier.
+\\
+Ces trois règles permettent de vérifier la correction partielle du programme.
+En exécutant les tests, on voit que ces conditions sont bien respectées, le programme affiche la liste des \emph{n} premiers nombres premiers.
+\\
+\\
+Pour prouver l'absence d'erreur à l'exécution, on doit montrer qu'il n'y a pas de division par zéro et que les variables restent dans les limites des nombres entiers d'une machine.
+\emph{Exec} permet de tester cette absence d'erreur à l'exécution.
+Les deux premières lignes montrent que count est compris entre 0 et \emph{n} + 1. \emph{n} étant un nombre entier, \emph{count} ne dépassera donc pas les bornes des entiers.
+La troisième ligne montre que \emph{c} est compris entre 0 et \emph{i}. Il est important que \emph{c} ne soit pas égal à zéro, car la seule division du programme (un modulo en réalité) à comme diviseur \emph{c}.
+La dernière ligne indique que le minimum de \emph{i} est 3, et qu'il doit rester dans la limite des naturels.
+\\
+Bien qu'avec un \emph{n} raisonnable (< 200) la règle \emph{Exec} est respectée par le programme, on peut aisément imaginer que pour un \emph{n} assez grand (mais restant dans la limite des nombres entiers), \emph{i} peut dépasser la limite des nombres entiers.
+En effet, \emph{i} désigne le nombre à tester (pour savoir s'il est premier, et dans ce cas l'afficher). \emph{ i} va croitre bien plus vite que \emph{n}, donc le programme ne sera pas sans erreur à l'exécution pour \emph{n} assez grand.
+
 
 \section{Preuve FramaC}
 Nous avons prouvé deux éléments grace à l'outil FramaC :\\
@@ -249,8 +400,7 @@ int main(){
 }
 \end{lstlisting}
 
-\\
-Nous avons donc bien validé /*@ assert nbprintf==n; */ et /*@ assert \forall int w; 2<=w<i ==> i%w!=0;*/ avant chaque sortie de valeur.
+%Nous avons donc bien validé $/*@ assert nbprintf==n; */$ et /*@ assert \forall int w; 2<=w<i ==> i%w!=0;*/ avant chaque sortie de valeur.
 
 %
 %
@@ -378,7 +528,7 @@ TestPreLoop == i>2 \/ b = 1 \* On a pas commencé la boucle donc b=1
 TestPostLoop == i\leq2 \/ b = 2*c+2*a \* On a commencé la boucle donc b= 2*c + 2*a
 TestEnd == pc#"Done" \/ ( (x\leq1 /\ r=1) \/ (x>1 /\ r=2*c+2*a) ) \*Terminé donc soit c'est pas passé dans la boucle et c'est 1 soit c'est la formule récursive
 \end{lstlisting}
-\\
+
 Ceci nous permet de vérifier la formule de récurrence (en admettant c==b[i-1] et a==b[i-2]) et que les résultats pour i=0 et i=1 sont bien 1, soit les valeurs de base de la formule récurrente.
 
 \section{Preuve FramaC}

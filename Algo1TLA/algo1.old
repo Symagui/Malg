@@ -45,7 +45,7 @@ vars == << i, count, c, nbprintf, lastprintedvalue, previouslastprintedvalue,
 Init == (* Global variables *)
         /\ i = 3
         /\ count = defaultInitValue
-        /\ c = 2
+        /\ c = defaultInitValue
         /\ nbprintf = 0
         /\ lastprintedvalue = 2
         /\ previouslastprintedvalue = 1
