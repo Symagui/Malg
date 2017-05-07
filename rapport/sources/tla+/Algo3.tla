@@ -82,8 +82,13 @@ Termination == <>(pc = "Done")
 
 ---------------------------------------------
 
+PreCond ==
+    /\ pc = "Lbl_1" => (n \leq 24 /\ n >= 0)
+
 TestPreLoop == i>2 \/ b = 1 \* On a pas commencé la boucle donc b=1
 TestPostLoop == i\leq2 \/ b = 2*c+2*a \* On a commencé la boucle donc b= 2*c + 2*a
-TestEnd == pc#"Done" \/ ( (x\leq1 /\ r=1) \/ (x>1 /\ r=2*c+2*a) ) \*Terminé donc soit c'est pas passé dans la boucle et c'est 1 soit c'est la formule récursive
+
+PostCond ==
+    /\ pc = "Done" => ( (x\leq1 /\ r=1) \/ (x>1 /\ r=2*c+2*a) ) \*Terminé donc soit c'est pas passé dans la boucle et c'est 1 soit c'est la formule récursive
 
 ======================

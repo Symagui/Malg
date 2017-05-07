@@ -61,7 +61,7 @@
   \renewcommand\contentsname{Sommaire}%
 }
 
-\def\nbpage{33}
+\def\nbpage{16}
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -125,6 +125,7 @@
 
 \chapter{Introduction}
 
+
 %
 %
 %
@@ -149,14 +150,14 @@ CONSTANTS n
             print <<2>>;
             nbprintf := nbprintf + 1;
         };
-        
+
         count := 2;
         while (count <= n) {
             c := 2;
             while (c <= (i - 1) /\ (i % c) # 0) {
                 c := c + 1;
             };
-            
+
             if (c = i) {
                 print <<i>>;
                 nbprintf := nbprintf + 1;
@@ -164,7 +165,7 @@ CONSTANTS n
                 lastprintedvalue := i;
                 count := count + 1;
             };
-            
+
             i := i + 1;
         }
     }
@@ -173,10 +174,10 @@ CONSTANTS n
 *)
 \* BEGIN TRANSLATION
 CONSTANT defaultInitValue
-VARIABLES i, count, c, nbprintf, lastprintedvalue, previouslastprintedvalue, 
+VARIABLES i, count, c, nbprintf, lastprintedvalue, previouslastprintedvalue,
           pc
 
-vars == << i, count, c, nbprintf, lastprintedvalue, previouslastprintedvalue, 
+vars == << i, count, c, nbprintf, lastprintedvalue, previouslastprintedvalue,
            pc >>
 
 Init == (* Global variables *)
@@ -205,14 +206,14 @@ Lbl_2 == /\ pc = "Lbl_2"
                     /\ pc' = "Lbl_3"
                ELSE /\ pc' = "Done"
                     /\ c' = c
-         /\ UNCHANGED << i, count, nbprintf, lastprintedvalue, 
+         /\ UNCHANGED << i, count, nbprintf, lastprintedvalue,
                          previouslastprintedvalue >>
 
 Lbl_3 == /\ pc = "Lbl_3"
          /\ IF c <= (i - 1) /\ (i % c) # 0
                THEN /\ c' = c + 1
                     /\ pc' = "Lbl_3"
-                    /\ UNCHANGED << i, count, nbprintf, lastprintedvalue, 
+                    /\ UNCHANGED << i, count, nbprintf, lastprintedvalue,
                                     previouslastprintedvalue >>
                ELSE /\ IF c = i
                           THEN /\ PrintT(<<i>>)
@@ -221,8 +222,8 @@ Lbl_3 == /\ pc = "Lbl_3"
                                /\ lastprintedvalue' = i
                                /\ count' = count + 1
                           ELSE /\ TRUE
-                               /\ UNCHANGED << count, nbprintf, 
-                                               lastprintedvalue, 
+                               /\ UNCHANGED << count, nbprintf,
+                                               lastprintedvalue,
                                                previouslastprintedvalue >>
                     /\ i' = i + 1
                     /\ pc' = "Lbl_2"
@@ -239,7 +240,7 @@ Termination == <>(pc = "Done")
 \* END TRANSLATION
 \end{lstlisting}
 
-Lors de la traduction en PlusCal, nous avons fait le choix d'introduire deux nouvelles variables : \emph{nbprintf}, \emph{previouslastprintedvalue} et \emph{lastprintedvalue}. 
+Lors de la traduction en PlusCal, nous avons fait le choix d'introduire deux nouvelles variables : \emph{nbprintf}, \emph{previouslastprintedvalue} et \emph{lastprintedvalue}.
 \\
 Ces variables, qui correspondent respectivement au nombre de valeurs affichés, à l'avant dernière valeur affichée, et à la dernière valeur affichée, permettront de mettre en place correctement la preuve de ce programme.
 
@@ -251,7 +252,7 @@ prime(a) == \A x \in 2..a : (x = a \/ a % x # 0)
 Pre ==
     /\ pc = "Lbl_1" => n \in Int  (* l'entree n est conforme *)
 
-Post == 
+Post ==
     /\ pc = "Done" /\ n \geq 0 => nbprintf = n  (* le nombre de valeur affichees au total est correct *)
     /\ pc = "Done" /\ n < 0 => nbprintf = 0  (* le nombre de valeur affichees au total est correct *)
 
@@ -260,9 +261,9 @@ Safe ==
     /\ n \geq 0 => (nbprintf \leq n /\ nbprintf \geq 0) (* test du nombre de printf *)
     /\ n < 0 => nbprintf = 0
     /\ lastprintedvalue > previouslastprintedvalue (* les valeurs affichees sont dans l'ordre croissant *)
-    /\ lastprintedvalue - previouslastprintedvalue > 1 => (\A x \in previouslastprintedvalue + 1 .. lastprintedvalue - 1 : prime(x) = FALSE) (* aucune valeur entre deux affichées n'est premier *) 
-   
-Exec == 
+    /\ lastprintedvalue - previouslastprintedvalue > 1 => (\A x \in previouslastprintedvalue + 1 .. lastprintedvalue - 1 : prime(x) = FALSE) (* aucune valeur entre deux affichées n'est premier *)
+
+Exec ==
     /\ n \geq 1 => (count \leq n + 1 /\ count \geq 0) (* limites de count entre 0 et n + 1 *)
     /\ n \leq 0 => (count \geq 0 /\ count \leq 2)
     /\ c \leq i /\ c \geq 1 (* limites de c entre 1 et i *)
@@ -307,15 +308,15 @@ int main(){
 
   printf("Enter the number of prime numbers required\n");
   scanf("%d",&n);
-	
+
   //On protege n des valeurs negatives pour framac
   if(n<0){
 	  n=0;
   }
-	
+
   //On ajoute une variable pour compter le nombre d'affichages total
   int nbprintf = 0;
-	
+
   /*@ assert n>=0; */
   /*@ assert nbprintf==0; */
 
@@ -325,14 +326,14 @@ int main(){
 	//On incrémente nbprintf
 	nbprintf++;
   }
-  
+
   //On s'assure qu'on a affiche 2 pour commencer
   /*@ assert n>=1 ==> nbprintf==1; */ //Preuve 2. On a n==nombre de printf
   /*@ assert n<1 ==> nbprintf==0; */ //Preuve 2. On a n==nombre de printf
 
-  
+
   //Il faut prouver que la boucle termine
-  
+
   /*@ loop invariant 2 <= count;
       loop invariant i>count;
       loop invariant nbprintf<=n;
@@ -341,7 +342,7 @@ int main(){
       loop invariant n<1 ==> nbprintf==0;
   */
   for (count = 2; count <= n; ){
-    
+
     /*@ assert count<=n;*/
 
     /*@ loop invariant 2 <= c <= i;
@@ -367,21 +368,21 @@ int main(){
 
     if (c == i){
       /*@ assert i==c; */
-      
+
       //On prouve que i est premier
       /*@ assert \forall int w; 2<=w<i ==> i%w!=0;*/ //Preuve 1. Les resultats sont tous des nombes premiers
       printf("%d\n",i);
-      
+
 	  //On incremente nbprintf
 	  nbprintf++;
       /*@ assert nbprintf==count;*/
-      
+
       count++;
       /*@ assert count<=n+1;*/
       /*@ assert nbprintf==count-1;*/
       /*@ assert nbprintf<=n;*/
     }
-    
+
     i++;
     /*@assert count<=n+1;*/
   }
@@ -393,14 +394,14 @@ int main(){
   /*@ assert n<1 ==> nbprintf==0; */
   /*@ assert n>=0; */
 
-  
+
   /*@ assert nbprintf==n; */ //Preuve 2. On a n==nombre de printf
-  
+
   return 0;
 }
 \end{lstlisting}
 
-%Nous avons donc bien validé $/*@ assert nbprintf==n; */$ et /*@ assert \forall int w; 2<=w<i ==> i%w!=0;*/ avant chaque sortie de valeur.
+Nous avons donc bien validé $/*@ assert nbprintf==n; */$ et $/*@ assert \forall int w; 2<=w<i ==> i\%w!=0;*/$ avant chaque sortie de valeur.
 
 %
 %
@@ -593,18 +594,25 @@ Lbl_2 : qui représente le while et donc le calcul de la formule décrite ci-des
 La variable pc nous permet de connaitre l'état actuel du programme.\\
 \\
 \begin{lstlisting}
-TestPreLoop == i>2 \/ b = 1 \* On a pas commencé la boucle donc b=1
-TestPostLoop == i\leq2 \/ b = 2*c+2*a \* On a commencé la boucle donc b= 2*c + 2*a
-TestEnd == pc#"Done" \/ ( (x\leq1 /\ r=1) \/ (x>1 /\ r=2*c+2*a) ) \*Terminé donc soit c'est pas passé dans la boucle et c'est 1 soit c'est la formule récursive
+  PreCond ==
+      /\ pc = "Lbl_1" => (n \leq 24 /\ n >= 0)
+
+  TestPreLoop == i>2 \/ b = 1 \* On a pas commencé la boucle donc b=1
+  TestPostLoop == i\leq2 \/ b = 2*c+2*a \* On a commencé la boucle donc b= 2*c + 2*a
+
+  PostCond ==
+      /\ pc = "Done" => ( (x\leq1 /\ r=1) \/ (x>1 /\ r=2*c+2*a) ) \*Terminé donc soit c'est pas passé dans la boucle et c'est 1 soit c'est la formule récursive
 \end{lstlisting}
 
 Ceci nous permet de vérifier la formule de récurrence (en admettant c==b[i-1] et a==b[i-2]) et que les résultats pour i=0 et i=1 sont bien 1, soit les valeurs de base de la formule récurrente.
+\\
+Comme indiqué ci-dessous, n doit être compris entre 0 et 24 pour ne pas avoir de dépassement de capacités.
 
 \section{Preuve FramaC}
 A l'aide de l'outil FramaC, nous avons prouvé que l'algorithme calcule bien la formule que nous avons déduit. Nous avions le choix entre tenter de prouver la formule sous forme récursive ou sous forme finale.\\
 Ayant eu peur que la précision flottante de la racine carré présente dans la deuxième solution nuise à la preuve, nous sommes donc partis sur le premier choix.\\
 Ainsi nous avons redéfini la formule récursive sur FramaC à l'aide des axiomes, et nous avons prouvé qu'à chaque itération de la boucle nous avançons en suivant cette formule.\\
-Enfin, nous avons ajouté une vérification sur le nombre entré par l'utilisateur, car il doit être positif et au inférieur strictement à 25. Tout nombre supérieur à 25 entraîne une dépassement des Integer et invalide donc toutes les preuves et le fonctionnement du programme.\\ 
+Enfin, nous avons ajouté une vérification sur le nombre entré par l'utilisateur, car il doit être positif et au inférieur strictement à 25. Tout nombre supérieur à 25 entraîne une dépassement des Integer et invalide donc toutes les preuves et le fonctionnement du programme.\\
 \begin{lstlisting}
 #include <stdio.h>
 #include <limits.h>
@@ -689,5 +697,13 @@ int main(){
 \section{Temps et méthodes de travail}
 Nous avons mis en place un dépôt git pour travailler en équipe, et nous avons divisés les 6 algorithmes entre nous 4 afin de travailler plus efficacement.
 
+\begin{tabular}{lllll}
+                                          & \textbf{C. CRAPANZANO} & \textbf{N. FERRÉ} & \textbf{R. MOLLARD} & \textbf{G. RUCHOT} \\
+Algorithme 1                              & 0h                         & 6h                     & 3h                       & 0h            \\
+Algorithme 2                              & 6h                         & 0h                     & 0h                       & 4h            \\
+Algorithme 3                              & 0h                         & 0h                     & 3h                       & 6h            \\
+Rapport                                   & 1h                         & 1h                     & 2h                       & 1h            \\
+\textbf{Total}                            & \textbf{7h}               & \textbf{7h}           & \textbf{8h}             & \textbf{11h}
+\end{tabular}
 
 \end{document}
