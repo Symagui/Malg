@@ -13,7 +13,7 @@ axiomatic Solve {
 }*/
 
 
-/*@ 
+/*@
 requires 0 <= x <= 24;
 requires \forall int k; 0 <= k <= 1 ==> solve(k) == 1 && 2 <= k < 25 ==> solve(k) == 2*solve(k-1) + 2*solve(k-2);
 assigns \nothing;
@@ -30,6 +30,7 @@ int p1(int x){
   } else if (x==1) {
     r=1;
   } else {
+    //Ces invariants sont necessaires pour prouver la formule
 		/*@ loop invariant positive : a>0 && b>0;
 				loop invariant solvb : b == solve(i-1);
 				loop invariant solva : a == solve(i-2);
@@ -41,21 +42,22 @@ int p1(int x){
 	    c=a;
 	    a=b;
 	    b=2*c+2*b;
-			
-			//printf("i = %d, b = %d\n",i, b);
+
 	  }
   	r=b;
   }
+  //Cette assertion prouve que l'on renvoit le bon resultat
 	//@assert solve(x) == r;
   return(r);
 }
 
 
-/*@ 
+/*@
 		ensures \result == 0;
 */
 int main(){
   int v = -1;
+  //On verifie que l'utilisateur rentre un nombre valide (0 <= v < 25)
 	while (v < 0 || v >= 25){
   	printf("Entrez la valeur  pour  v\n");
   	scanf("%d", &v);

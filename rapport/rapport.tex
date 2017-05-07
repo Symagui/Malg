@@ -308,7 +308,7 @@ int main(){
   printf("Enter the number of prime numbers required\n");
   scanf("%d",&n);
 	
-  //On protège n des valeurs négatives pour framac
+  //On protege n des valeurs negatives pour framac
   if(n<0){
 	  n=0;
   }
@@ -321,12 +321,12 @@ int main(){
 
   if (n>=1){
     printf("First %d prime numbers are :\n", n);
-    printf("2\n"); //Preuve 1. Les résultats sont tous des nombes premiers
+    printf("2\n"); //Preuve 1. Les resultats sont tous des nombes premiers
 	//On incrémente nbprintf
 	nbprintf++;
   }
   
-  //On s'assure qu'on a affiché 2 pour commencer
+  //On s'assure qu'on a affiche 2 pour commencer
   /*@ assert n>=1 ==> nbprintf==1; */ //Preuve 2. On a n==nombre de printf
   /*@ assert n<1 ==> nbprintf==0; */ //Preuve 2. On a n==nombre de printf
 
@@ -369,10 +369,10 @@ int main(){
       /*@ assert i==c; */
       
       //On prouve que i est premier
-      /*@ assert \forall int w; 2<=w<i ==> i%w!=0;*/ //Preuve 1. Les résultats sont tous des nombes premiers
+      /*@ assert \forall int w; 2<=w<i ==> i%w!=0;*/ //Preuve 1. Les resultats sont tous des nombes premiers
       printf("%d\n",i);
       
-	  //On incrémente nbprintf
+	  //On incremente nbprintf
 	  nbprintf++;
       /*@ assert nbprintf==count;*/
       
@@ -416,7 +416,76 @@ Ce programme propose à l'utilisateur de créer une liste de n éléments, puis 
 \section{Preuve TLA+}
 
 \section{Preuve FramaC}
+Avec l'outil FramaC, nous avons pu prouver qu'à la fin de la boucle principale, le tableau d'entier renseigné au début de l'algorithme est trié par ordre croissant.\\
+La méthode de tri étant le tri sélection, à chaque itération de la boucle un élément de plus était trié, ainsi c'est ce que l'on a prouvé, pour en déduire le résultat final.\\
+De plus, comme nous déclarons un array de 100 éléments, nous avons ajouté une vérification dans le programme évitant que l'utilisateur rentre un nombre négatif ou supérieur à cette limite lorsque l'on lui demande la taille du tableau.\\
+Enfin, puisque l'on manipule des tableaux, il souvent nécessaire de rappeler les assertions dans le programme, notamment lorsque l'on swap deux éléments.\\
+\begin{lstlisting}
+#include <stdio.h>
 
+int main(){
+  int array[100], n = -1, c, d, position, swap;
+  while (n<1 || n>100){
+  printf("Enter number of elements < 100\n");
+  scanf("%d",&n);
+  }
+  printf("Enter %d integers\n",n);
+
+  // On s'assure que l'on a que 100 elements
+  /*@ loop invariant \valid(array+ (0..n-1));
+      loop invariant 0<n<=100; */
+  for (c=0; c<n; c++){
+    scanf("%d", &array[c]);
+  }
+
+  //A chaque iteration, un element de plus est trie, c'est ce que l'on montre avec le premier invariant
+  /*@ loop invariant \forall int i,j; (0 <= i < j < n && i < c) ==> array[i] <= array[j];
+      loop invariant 0 <= c < n;
+  */
+  for (c = 0; c < (n-1); c++){
+    position = c;
+
+    /*@ loop invariant \forall int i; c <= i < d ==> array[position] <= array[i];
+        loop invariant \forall int i,j; (0 <= i < j < n && i < c) ==> array[i] <= array[j];
+        loop invariant c+1 <= d <= n;
+        loop invariant c<=position<n;
+        loop assigns d,position; */
+    for (d = c+1; d<n; d++){
+      if (array[position]>array[d]) position = d;
+    }
+
+    //@ assert \forall int i; c<=i<n ==>array[position] <= array[i];
+    //@ assert \forall int i,j; (0 <= i < j < n && i < c) ==> array[i] <= array[j];
+
+    if (position != c){
+      swap = array[c];
+      array[c] = array[position];
+      //@ assert \forall int i,j; (0 <= i < j < n && i < c) ==> array[i] <= array[j];
+      array[position] = swap;
+      //On rappelle les assertions après la modification de l'array
+      //@ assert array[c] <= array[position];
+      //@ assert 0 <= c < n;
+      //@ assert \forall int i; c<=i<n ==>array[c] <= array[i];
+      //@ assert \forall int i,j; (0 <= i < j < n && i < c) ==> array[i] <= array[j];
+
+    }
+  }
+  //L'assertion suivante est celle qui prouve le fonctionnement du programme,
+  //puisque l'on ne modifie plus le tableau par la suite
+
+  //@ assert \forall int i,j; (0 <= i < j <= n-1) ==> array[i] <= array[j] ;
+  printf("Sorted list in ascending order :\n");
+
+  /*@ loop invariant \forall int i,j; (0 <= i < j <= n-1) ==> array[i] <= array[j] ;
+      loop invariant 0<= c <= n;*/
+  for (c=0; c<n; c++){
+    //@ assert c<n-1 ==> array[c] <= array[c+1];
+    printf("%d\n",array[c]);
+  }
+
+  return 0;
+}
+\end{lstlisting}
 %
 %
 %
@@ -424,7 +493,7 @@ Ce programme propose à l'utilisateur de créer une liste de n éléments, puis 
 \chapter{Autre algorithme}
 
 \section{Description de l'algorithme}
-Ce programme mistère calcule les éléments de la formule de récurrence \\
+Ce programme mystère calcule les éléments de la formule de récurrence \\
 \[ r(i) = 2*r(i-1) + 2*r(i-2), r(0) = 1, r(1) = 1 \]
 \\
 Après résolution, ceci correspond à la formule suivante : \\
@@ -532,7 +601,82 @@ TestEnd == pc#"Done" \/ ( (x\leq1 /\ r=1) \/ (x>1 /\ r=2*c+2*a) ) \*Terminé don
 Ceci nous permet de vérifier la formule de récurrence (en admettant c==b[i-1] et a==b[i-2]) et que les résultats pour i=0 et i=1 sont bien 1, soit les valeurs de base de la formule récurrente.
 
 \section{Preuve FramaC}
+A l'aide de l'outil FramaC, nous avons prouvé que l'algorithme calcule bien la formule que nous avons déduit. Nous avions le choix entre tenter de prouver la formule sous forme récursive ou sous forme finale.\\
+Ayant eu peur que la précision flottante de la racine carré présente dans la deuxième solution nuise à la preuve, nous sommes donc partis sur le premier choix.\\
+Ainsi nous avons redéfini la formule récursive sur FramaC à l'aide des axiomes, et nous avons prouvé qu'à chaque itération de la boucle nous avançons en suivant cette formule.\\
+Enfin, nous avons ajouté une vérification sur le nombre entré par l'utilisateur, car il doit être positif et au inférieur strictement à 25. Tout nombre supérieur à 25 entraîne une dépassement des Integer et invalide donc toutes les preuves et le fonctionnement du programme.\\ 
+\begin{lstlisting}
+#include <stdio.h>
+#include <limits.h>
+int inmax = INT_MAX;
+/*@
+axiomatic Solve {
+  logic integer solve(integer n);
 
+  axiom solve_0: solve(0) ==  1;
+
+  axiom solve_1: solve(1) ==  1;
+
+  axiom solve_n: \forall integer n;  (n>1 ==> solve(n) == 2*solve(n-2)+2*solve(n-1)) && (n<0 ==> solve(n) == 1);
+}*/
+
+
+/*@
+requires 0 <= x <= 24;
+requires \forall int k; 0 <= k <= 1 ==> solve(k) == 1 && 2 <= k < 25 ==> solve(k) == 2*solve(k-1) + 2*solve(k-2);
+assigns \nothing;
+ensures \result > 0;
+ensures \result == solve(x);
+*/
+int p1(int x){
+  int a,b,c,i,r,fin;
+  a=1;
+  b=1;
+  i=2;
+  if (x==0) {
+    r=1;
+  } else if (x==1) {
+    r=1;
+  } else {
+    //Ces invariants sont necessaires pour prouver la formule
+		/*@ loop invariant positive : a>0 && b>0;
+				loop invariant solvb : b == solve(i-1);
+				loop invariant solva : a == solve(i-2);
+				loop invariant solvc : i>=3 ==> c == solve(i-3);
+				loop invariant i : 2 <= i <= x+1;
+				loop assigns a,b,c,i;*/
+    while (i-1 < x){
+      i=i+1;
+	    c=a;
+	    a=b;
+	    b=2*c+2*b;
+
+	  }
+  	r=b;
+  }
+  //Cette assertion prouve que l'on renvoit le bon resultat
+	//@assert solve(x) == r;
+  return(r);
+}
+
+
+/*@
+		ensures \result == 0;
+*/
+int main(){
+  int v = -1;
+  //On verifie que l'utilisateur rentre un nombre valide (0 <= v < 25)
+	while (v < 0 || v >= 25){
+  	printf("Entrez la valeur  pour  v\n");
+  	scanf("%d", &v);
+	}
+	//@ assert v >= 0 && v< 25;
+	int p1v = p1(v);
+	//@ assert p1v == solve(v);
+  printf(" voici la reponse de votre solution p2(%d)=%d\n",v,p1(v));
+  return 0;
+}
+\end{lstlisting}
 %
 %
 %
@@ -543,7 +687,7 @@ Ceci nous permet de vérifier la formule de récurrence (en admettant c==b[i-1] 
 \section{Difficultés rencontrées}
 
 \section{Temps et méthodes de travail}
-
+Nous avons mis en place un dépôt git pour travailler en équipe, et nous avons divisés les 6 algorithmes entre nous 4 afin de travailler plus efficacement.
 
 
 \end{document}
