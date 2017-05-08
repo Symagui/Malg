@@ -414,13 +414,136 @@ Ce programme propose à l'utilisateur de créer une liste de n éléments, puis 
 
 \section{Traduction PlusCal}
 
+\begin{lstlisting}
+
+---------------------------- MODULE algo2 ----------------------------
+EXTENDS Naturals, TLC
+CONSTANTS nhat
+(*
+--algorithm algo2{
+    variables c, d, position, swap, array;
+    {
+        c := 0;
+        while(c < (n-1)){
+            position := c;
+            d := c+1;
+            while(d < n){
+                if(array[position] > array[d]){
+                    position := d;
+                };
+                d := d+1;
+            };
+            if(position != c){
+                swap := array[c];
+                array[c] := array[position];
+                array[position] := swap;
+            };
+            c := c+1;
+        };
+        print<<"Sorted list in ascending order">>;
+        c := 0;
+        while(c < n){
+            print<<array[c]>>;
+            c := c+1;
+        };
+    }
+}
+*)
+
+
+\* BEGIN TRANSLATION
+CONSTANT defaultInitValue
+VARIABLES c, d, position, swap, array, pc
+
+vars == << c, d, position, swap, array, pc >>
+
+Init == (* Global variables *)
+        /\ c = defaultInitValue
+        /\ d = defaultInitValue
+        /\ position = defaultInitValue
+        /\ swap = defaultInitValue
+        /\ array = defaultInitValue
+        /\ pc = "Lbl_1"
+
+Lbl_1 == /\ pc = "Lbl_1"
+         /\ c' = 0
+         /\ pc' = "Lbl_2"
+         /\ UNCHANGED << d, position, swap, array >>
+
+Lbl_2 == /\ pc = "Lbl_2"
+         /\ IF c < (n-1)
+               THEN /\ position' = c
+                    /\ d' = c+1
+                    /\ pc' = "Lbl_3"
+                    /\ c' = c
+               ELSE /\ PrintT(<<"Sorted list in ascending order">>)
+                    /\ c' = 0
+                    /\ pc' = "Lbl_6"
+                    /\ UNCHANGED << d, position >>
+         /\ UNCHANGED << swap, array >>
+
+Lbl_3 == /\ pc = "Lbl_3"
+         /\ IF d < n
+               THEN /\ IF array[position] > array[d]
+                          THEN /\ position' = d
+                          ELSE /\ TRUE
+                               /\ UNCHANGED position
+                    /\ d' = d+1
+                    /\ pc' = "Lbl_3"
+                    /\ UNCHANGED << swap, array >>
+               ELSE /\ IF position != c
+                          THEN /\ swap' = array[c]
+                               /\ array' = [array EXCEPT ![c] = array[position]]
+                               /\ pc' = "Lbl_4"
+                          ELSE /\ pc' = "Lbl_5"
+                               /\ UNCHANGED << swap, array >>
+                    /\ UNCHANGED << d, position >>
+         /\ c' = c
+
+Lbl_4 == /\ pc = "Lbl_4"
+         /\ array' = [array EXCEPT ![position] = swap]
+         /\ pc' = "Lbl_5"
+         /\ UNCHANGED << c, d, position, swap >>
+
+Lbl_5 == /\ pc = "Lbl_5"
+         /\ c' = c+1
+         /\ pc' = "Lbl_2"
+         /\ UNCHANGED << d, position, swap, array >>
+
+Lbl_6 == /\ pc = "Lbl_6"
+         /\ IF c < n
+               THEN /\ PrintT(<<array[c]>>)
+                    /\ c' = c+1
+                    /\ pc' = "Lbl_6"
+               ELSE /\ pc' = "Done"
+                    /\ c' = c
+         /\ UNCHANGED << d, position, swap, array >>
+
+Next == Lbl_1 \/ Lbl_2 \/ Lbl_3 \/ Lbl_4 \/ Lbl_5 \/ Lbl_6
+           \/ (* Disjunct to prevent deadlock on termination *)
+              (pc = "Done" /\ UNCHANGED vars)
+
+Spec == Init /\ [][Next]_vars
+
+Termination == <>(pc = "Done")
+
+\* END TRANSLATION
+
+\end{lstlisting}
+
 \section{Preuve TLA+}
+On vérifie qu'on ne dépasse pas les bornes au début, que l'indice est toujours dans le tableau et que le tableau est trié à la fin.
+\begin{lstlisting}
+PreCond == n <= 100
+Invariant == c <= n 
+PostCond == pc = "Done" /\ \A i \in 1..n-1 : array[i] <= array[i+1]
+\end{lstlisting}
 
 \section{Preuve FramaC}
 Avec l'outil FramaC, nous avons pu prouver qu'à la fin de la boucle principale, le tableau d'entier renseigné au début de l'algorithme est trié par ordre croissant.\\
 La méthode de tri étant le tri sélection, à chaque itération de la boucle un élément de plus était trié, ainsi c'est ce que l'on a prouvé, pour en déduire le résultat final.\\
 De plus, comme nous déclarons un array de 100 éléments, nous avons ajouté une vérification dans le programme évitant que l'utilisateur rentre un nombre négatif ou supérieur à cette limite lorsque l'on lui demande la taille du tableau.\\
-Enfin, puisque l'on manipule des tableaux, il souvent nécessaire de rappeler les assertions dans le programme, notamment lorsque l'on swap deux éléments.\\
+Enfin, puisque l'on manipule des tableaux, il est souvent nécessaire de rappeler les assertions dans le programme, notamment lorsque l'on swap deux éléments.\\
 \begin{lstlisting}
 #include <stdio.h>
 
@@ -700,10 +823,10 @@ Nous avons mis en place un dépôt git pour travailler en équipe, et nous avons
 \begin{tabular}{lllll}
                                           & \textbf{C. CRAPANZANO} & \textbf{N. FERRÉ} & \textbf{R. MOLLARD} & \textbf{G. RUCHOT} \\
 Algorithme 1                              & 0h                         & 6h                     & 3h                       & 0h            \\
-Algorithme 2                              & 6h                         & 0h                     & 0h                       & 4h            \\
+Algorithme 2                              & 4h                         & 0h                     & 0h                       & 4h            \\
 Algorithme 3                              & 0h                         & 0h                     & 3h                       & 6h            \\
 Rapport                                   & 1h                         & 1h                     & 2h                       & 1h            \\
-\textbf{Total}                            & \textbf{7h}               & \textbf{7h}           & \textbf{8h}             & \textbf{11h}
+\textbf{Total}                            & \textbf{5h}               & \textbf{7h}           & \textbf{8h}             & \textbf{11h}
 \end{tabular}
 
 \end{document}
