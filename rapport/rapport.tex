@@ -61,7 +61,7 @@
   \renewcommand\contentsname{Sommaire}%
 }
 
-\def\nbpage{16}
+\def\nbpage{17}
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
@@ -124,7 +124,7 @@
 
 
 \chapter{Introduction}
-\\
+
 Ce document présente différentes méthodes de preuves partielles et complètes des trois programmes du sujet numéro 8.
 
 %
@@ -719,7 +719,7 @@ La variable pc nous permet de connaitre l'état actuel du programme.\\
 \\
 \begin{lstlisting}
   PreCond ==
-      /\ pc = "Lbl_1" => (n \leq 24 /\ n >= 0)
+      /\ pc = "Lbl_1" => (x \leq 24 /\ x >= 0)
 
   TestPreLoop == i>2 \/ b = 1 \* On a pas commencé la boucle donc b=1
   TestPostLoop == i\leq2 \/ b = 2*c+2*a \* On a commencé la boucle donc b= 2*c + 2*a
